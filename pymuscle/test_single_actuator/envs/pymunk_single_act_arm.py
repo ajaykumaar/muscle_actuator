@@ -8,6 +8,9 @@ import numpy as np
 from pygame.locals import (QUIT, KEYDOWN, K_ESCAPE)
 # from pymuscle import StandardMuscle as Muscle
 from pymuscle import PotvinFuglevandMuscle as Muscle
+#Uncomment the below line to run on google colab
+# from pymuscle.pymuscle import PotvinFuglevandMuscle as Muscle 
+
 
 # from pymunk.constraints import *
 
