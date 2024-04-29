@@ -1,0 +1,14 @@
+4/26/24 Friday
+
+Rundown on existing codes
+
+- PID_arm_angle_ctrl.py is the customized working code for PID angle control 
+- RL_arm_test.py is the playground for testing RL algos with gym muscle actuator env
+- colab notebook 'muscle_actuator_rl_tests' has stable_baselines algos testing code with different gym environments
+- using stable_baselines SAC worked great with lunar lander with has the same continuous action space (2 actions) 
+    and a larger obs space(8 obs)
+- re-run stable_baselines SAC on Lunar Lander
+    - after 20_000 steps, the rewards increased from -274 to 53 with stable_baselines SAC on Lunar Lander
+    - SAC is not running on GPU (check later)
+
+- TODO: compare env code between muscle actuator and lunar lander with the intention of testing SB's SAC on muscle actuator
