@@ -11,4 +11,12 @@ Rundown on existing codes
     - after 20_000 steps, the rewards increased from -274 to 53 with stable_baselines SAC on Lunar Lander
     - SAC is not running on GPU (check later)
 
+
+4/29/24 Monday
+
+Setup github and google colab to run the muscle actuator on colab
+    - have to change an import statement in the env file to run in on colab
+
+4/30/24 Tuesday
+
 - TODO: compare env code between muscle actuator and lunar lander with the intention of testing SB's SAC on muscle actuator
