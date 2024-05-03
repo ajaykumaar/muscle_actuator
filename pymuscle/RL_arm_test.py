@@ -15,7 +15,7 @@ from stable_baselines3.common.monitor import Monitor
 from test_single_actuator.envs import SingleActEnv
 
 # env = PymunkSingleActArmEnv(apply_fatigue=False)
-target_angle = 204
+target_angle = 210
 env = SingleActEnv(target_angle=target_angle)
 print("action space: ", env.action_space)
 print("observation space: ", env.observation_space)
@@ -33,8 +33,8 @@ frames_per_second = 50
 step_size = 1 / frames_per_second
 total_steps = 1500 #int(sim_duration / step_size)
 
-brachialis_input = 0.754862 #1.0  # Percent of max input
-tricep_input = 1.6919254 #2.0
+brachialis_input = 0.5  # Percent of max input
+tricep_input = 1.0
 
 obs = env.reset()
 # print(obs)
@@ -49,8 +49,9 @@ rand_action = env.action_space.sample()
 
 for i in range(total_steps):
     
-    obs, reward, termintated, truncated, info = env.step(rand_action, step_size, debug=True)
+    obs, reward, termintated, truncated, info = env.step(const_action, step_size, debug=True)
     lower_arm_angle.append(obs[2])
+    print(reward)
 
     # tricep_input += 0.01
 

@@ -257,11 +257,10 @@ class SingleActEnv(PymunkSingleActArmEnv):
         self.brach.stiffness = brach_output * gain
         self.tricep.stiffness = tricep_output * gain
 
-        obs = self._get_observation()
+        obs, info = self._get_observation()
         reward = self._get_reward()
         terminated = self._is_done()
         truncated = False
-        info = {}
 
         return obs, reward, terminated, truncated, info  
     
@@ -308,6 +307,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
     
     def _get_reward(self):
         #reward = m*|current_angle - target_angle| + c   ; m= -1, c=100
+        #max possible reward is c = 100
 
         current_angle = self._get_observation()[2] #current_angle
 
