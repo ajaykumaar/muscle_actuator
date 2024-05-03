@@ -235,12 +235,16 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         self.target_angle = target_angle
 
-    def step(self, input_array, step_size=0.02, debug=True):
+    def step(self, input_array, step_size=0.02, debug=False):
         # Check for user input
         self._handle_keys()
 
         if debug:
             print(input_array)
+            print(input_array[0], input_array[1])
+
+        #converting float32 action to float64 bcause pymuscle's muscle step only takes float64
+        input_array = input_array.astype(np.float64)
 
         self.space.step(step_size)
         self.frames += 1
@@ -288,7 +292,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         arm_angle = np.rad2deg(self.copy_lower_arm.angle)
 
-        return np.array([hand_x, hand_y, arm_angle])
+        return np.array([hand_x, hand_y, arm_angle]).astype(np.float32)
     
     def _is_done(self):
         # if the lower arm angle goes beyond the range [157,260] the episode ends

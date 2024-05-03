@@ -4,13 +4,15 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from test_single_actuator.envs import SingleActEnv
+
 
 import stable_baselines3
 from stable_baselines3 import SAC #PPO, A2C,
 # from stable_baselines3.common.policies import MlpPolicy
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
+
+from test_single_actuator.envs import SingleActEnv
 
 # env = PymunkSingleActArmEnv(apply_fatigue=False)
 target_angle = 204
@@ -31,17 +33,23 @@ frames_per_second = 50
 step_size = 1 / frames_per_second
 total_steps = 1500 #int(sim_duration / step_size)
 
-brachialis_input = 1.0  # Percent of max input
-tricep_input = 2.0
+brachialis_input = 0.754862 #1.0  # Percent of max input
+tricep_input = 1.6919254 #2.0
 
 obs = env.reset()
-print(obs)
+# print(obs)
 
 lower_arm_angle = []
 
+const_action = np.array([brachialis_input, tricep_input]).astype(np.float32)
+rand_action = env.action_space.sample()
+
+# print(type(const_action), type(rand_action))
+# print(np.array(const_action).shape, rand_action.shape)
+
 for i in range(total_steps):
     
-    obs, reward, done, info = env.step([brachialis_input, tricep_input],  step_size, debug=False)
+    obs, reward, termintated, truncated, info = env.step(rand_action, step_size, debug=True)
     lower_arm_angle.append(obs[2])
 
     # tricep_input += 0.01
