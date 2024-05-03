@@ -19,12 +19,6 @@ target_angle = 210
 env = SingleActEnv(target_angle=target_angle)
 print("action space: ", env.action_space)
 print("observation space: ", env.observation_space)
-# env = Monitor(env)
-
-# model = SAC("MlpPolicy", env, train_freq=1, gradient_steps=2, verbose=1)
-
-# model.learn(total_timesteps=100)
-
 
 
 # Set up the simulation parameters
@@ -33,44 +27,78 @@ frames_per_second = 50
 step_size = 1 / frames_per_second
 total_steps = 1500 #int(sim_duration / step_size)
 
-brachialis_input = 0.5  # Percent of max input
-tricep_input = 1.0
+model = SAC("MlpPolicy", env, train_freq=1, gradient_steps=2, verbose=1)
 
-obs = env.reset()
-# print(obs)
 
-lower_arm_angle = []
+def evaluate(model, num_steps=1000):
+  """
+  Evaluate a RL agent
+  :param model: (BaseRLModel object) the RL Agent
+  :param num_steps: (int) number of timesteps to evaluate it
+  :return: (float) Mean reward for the last 100 episodes
+  """
+  episode_rewards = [0.0]
+  obs, info = env.reset()
+#   print(obs)
+  for i in range(num_steps):
+      # _states are only useful when using LSTM policies
+      action, _states = model.predict(obs)
+      # here, action, rewards and dones are arrays
+      # because we are using vectorized env
+      obs, rewards, terminated, truncated, info = env.step(action)
+      print(action, rewards)
 
-const_action = np.array([brachialis_input, tricep_input]).astype(np.float32)
-rand_action = env.action_space.sample()
+      # Stats
+      episode_rewards[-1] += rewards
+      if terminated:
+          obs, info = env.reset()
+          episode_rewards.append(0.0)
+  # Compute mean reward for the last 100 episodes
+  mean_100ep_reward = round(np.mean(episode_rewards[-100:]), 1)
+  print("Mean reward:", mean_100ep_reward, "Num episodes:", len(episode_rewards))
 
-# print(type(const_action), type(rand_action))
-# print(np.array(const_action).shape, rand_action.shape)
+  return mean_100ep_reward
 
-for i in range(total_steps):
-    
-    obs, reward, termintated, truncated, info = env.step(const_action, step_size, debug=True)
-    lower_arm_angle.append(obs[2])
-    print(reward)
 
-    # tricep_input += 0.01
+# model.learn(total_timesteps=2_000)
 
-    # print(obs[2])
+# evaluate(model)
 
-    env.render()
+def test_action_reward(brach, tri):
 
-    # print(obs[2]-target_angle, reward)
+    obs = env.reset()
+    # print(obs)
 
-print("current obs: ", obs)
-obs = env.reset()
-print(obs)
-time_steps = list(range(total_steps))
-plt.plot(time_steps,lower_arm_angle)
-plt.show()
+    lower_arm_angle = []
+    brachialis_input = brach  # Percent of max input
+    tricep_input = tri
 
-# for i in range(10):
+    const_action = np.array([brachialis_input, tricep_input]).astype(np.float32)
+    rand_action = env.action_space.sample()
 
-#     hand_x, hand_y, low_arm_angle = env.step([brachialis_input, tricep_input],  step_size, debug=False)
+    # print(type(const_action), type(rand_action))
+    # print(np.array(const_action).shape, rand_action.shape)
 
-#     print(low_arm_angle, hand_x, hand_y)
+    for i in range(total_steps):
+        
+        obs, reward, termintated, truncated, info = env.step(const_action, step_size, debug=False)
+        lower_arm_angle.append(obs[2])
+        print(reward)
 
+        # tricep_input += 0.01
+
+        # print(obs[2])
+
+        env.render()
+        
+
+        # print(obs[2]-target_angle, reward)
+
+    print("current obs: ", obs)
+    obs = env.reset()
+    print(obs)
+    time_steps = list(range(total_steps))
+    plt.plot(time_steps,lower_arm_angle)
+    plt.show()
+
+test_action_reward(brach=0.5, tri=1.8)

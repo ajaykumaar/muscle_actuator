@@ -24,4 +24,9 @@ Setup SSH key betwee google colab and github
 
 5/3/24 Friday
 
-compare env code between muscle actuator and lunar lander with the intention of testing SB's SAC on muscle actuator
+- environment is good... similar to gym env structure... can run SAC on the env
+- issues with reward function
+    - right now the reward is calculated on instantaneous angle but to achieve the target angle the excitation
+      should be applied for atleast a few timesteps.
+    - takeaway: figure out how to include the time effect in reward function. 
+    - something like: it's ok to not reach target at t=1 but not okay if the target can't be reached at t=5
