@@ -255,9 +255,11 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         obs = self._get_observation()
         reward = self._get_reward()
-        done = self._is_done()
+        terminated = self._is_done()
+        truncated = False
+        info = {}
 
-        return obs, reward, done, None  
+        return obs, reward, terminated, truncated, info  
     
     def reset(self, seed= None):
         self._init_sim()
@@ -274,8 +276,9 @@ class SingleActEnv(PymunkSingleActArmEnv):
             apply_peripheral_fatigue=False  # Tricep never gets tired in this env
         )
         obs = self._get_observation()
+        info = {}
 
-        return obs, None
+        return obs, info
 
     def _get_observation(self):
 
@@ -293,6 +296,8 @@ class SingleActEnv(PymunkSingleActArmEnv):
         arm_angle = np.rad2deg(self.copy_lower_arm.angle)
 
         if arm_angle > 260 or arm_angle < 157:
+            done = True
+        elif arm_angle == self.target_angle:
             done = True
 
         return done

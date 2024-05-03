@@ -15,8 +15,13 @@ Rundown on existing codes
 4/29/24 Monday
 
 Setup github and google colab to run the muscle actuator on colab
-    - have to change an import statement in the env file to run in on colab
+    - make sure to change directory to muscle_actuator/pymuscle
+
 
 4/30/24 Tuesday
 
-- TODO: compare env code between muscle actuator and lunar lander with the intention of testing SB's SAC on muscle actuator
+Setup SSH key betwee google colab and github
+
+5/3/24 Friday
+
+compare env code between muscle actuator and lunar lander with the intention of testing SB's SAC on muscle actuator
