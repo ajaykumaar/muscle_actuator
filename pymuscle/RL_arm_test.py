@@ -22,10 +22,11 @@ print("observation space: ", env.observation_space)
 
 
 # Set up the simulation parameters
-sim_duration = 100  # seconds
+sim_duration = 10  # seconds
 frames_per_second = 50
 step_size = 1 / frames_per_second
-total_steps = 1500 #int(sim_duration / step_size)
+total_steps = int((sim_duration / step_size))
+print("Step size: ", step_size, "Total steps: ", total_steps)
 
 model = SAC("MlpPolicy", env, train_freq=1, gradient_steps=2, verbose=1)
 
@@ -70,6 +71,7 @@ def test_action_reward(brach, tri):
     # print(obs)
 
     lower_arm_angle = []
+    reward_list = []
     brachialis_input = brach  # Percent of max input
     tricep_input = tri
 
@@ -83,7 +85,8 @@ def test_action_reward(brach, tri):
         
         obs, reward, termintated, truncated, info = env.step(const_action, step_size, debug=False)
         lower_arm_angle.append(obs[2])
-        print(reward)
+        reward_list.append(reward)
+        # print(reward)
 
         # tricep_input += 0.01
 
@@ -94,11 +97,14 @@ def test_action_reward(brach, tri):
 
         # print(obs[2]-target_angle, reward)
 
-    print("current obs: ", obs)
-    obs = env.reset()
-    print(obs)
+    # print("current obs: ", obs)
+    # obs = env.reset()
+    # print(obs)
     time_steps = list(range(total_steps))
+    plt.figure(0)
     plt.plot(time_steps,lower_arm_angle)
+    plt.figure(1)
+    plt.plot(time_steps,reward_list)
     plt.show()
 
-test_action_reward(brach=0.5, tri=1.8)
+test_action_reward(brach=0.5, tri=1.0)

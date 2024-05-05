@@ -30,3 +30,9 @@ Setup SSH key betwee google colab and github
       should be applied for atleast a few timesteps.
     - takeaway: figure out how to include the time effect in reward function. 
     - something like: it's ok to not reach target at t=1 but not okay if the target can't be reached at t=5
+
+5/5/24 Sunday
+
+- added a variable to count time elapsed
+- reward right now, rewards for staying close to target over time.
+TODO: find a way to penalize for not staying close to target after certain time has elapsed

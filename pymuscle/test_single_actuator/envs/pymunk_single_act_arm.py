@@ -232,6 +232,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,))
+        self.current_time = 0.0
 
         self.target_angle = target_angle
 
@@ -243,6 +244,8 @@ class SingleActEnv(PymunkSingleActArmEnv):
             print(input_array)
             print(input_array[0], input_array[1])
 
+        self.current_time += self.space.current_time_step
+        print("Time elapsed: ", self.current_time)
         #converting float32 action to float64 bcause pymuscle's muscle step only takes float64
         input_array = input_array.astype(np.float64)
 
@@ -308,7 +311,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
         return done
     
     def _get_reward(self):
-        #reward = m*|current_angle - target_angle| + c   ; m= -1, c=100
+        #reward = m*|current_angle - target_angle| + c*time   ; m= -1, c=100
         #max possible reward is c = 500, if target angle is reached
 
         current_angle = self._get_observation()[2] #current_angle
@@ -316,7 +319,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
         if current_angle == self.target_angle:
             reward = 500
         else:
-            reward = -1.0*(np.abs(current_angle - self.target_angle)) + 100
+            reward = -1.0*(np.abs(current_angle - self.target_angle)) + (10*self.current_time)
 
         return reward
 
@@ -328,7 +331,6 @@ class SingleActEnv(PymunkSingleActArmEnv):
     # a preferred approach would be an actor-critic solution because it directly maps states to actions hence might be better suited
     #for a muscle actuator
 
-    # TODO: check out actor-critic methods... PPO/DDPG
 
 
 
