@@ -327,7 +327,8 @@ class SingleActEnv(PymunkSingleActArmEnv):
             self.prev_angle = current_angle
 
         # print(error, theta_dt, current_angle - self.prev_angle)
-        reward = -((error**2) + (0.1*(theta_dt**2)) + 0.001* np.sum(self.actions))
+        # reward = -((error**2) + (0.1*(theta_dt**2)) + 0.001* np.sum(self.actions))
+        reward = -(error**2)
 
 
         ##### custom reward
