@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-
+import gymnasium as gym
 import stable_baselines3
 from stable_baselines3 import SAC #PPO, A2C,
 # from stable_baselines3.common.policies import MlpPolicy
@@ -20,6 +20,9 @@ env = SingleActEnv(target_angle=target_angle)
 print("action space: ", env.action_space)
 print("observation space: ", env.observation_space)
 
+# env = gym.make('Pendulum-v1', g=9.81)
+# print("action space: ", env.action_space)
+# print("observation space: ", env.observation_space)
 
 # Set up the simulation parameters
 sim_duration = 10  # seconds
@@ -61,9 +64,9 @@ def evaluate(model, num_steps=1000):
   return mean_100ep_reward
 
 
-# model.learn(total_timesteps=2_000)
+model.learn(total_timesteps=2_000)
 
-# evaluate(model)
+evaluate(model)
 
 def test_action_reward(brach, tri):
 
@@ -100,11 +103,12 @@ def test_action_reward(brach, tri):
     # print("current obs: ", obs)
     # obs = env.reset()
     # print(obs)
-    time_steps = list(range(total_steps))
+    print(np.abs(lower_arm_angle[-1] - target_angle))
+    time_steps = np.arange(0, sim_duration, step_size)#list(range(sim_duration, step_size))
     plt.figure(0)
     plt.plot(time_steps,lower_arm_angle)
     plt.figure(1)
     plt.plot(time_steps,reward_list)
     plt.show()
 
-test_action_reward(brach=0.5, tri=1.0)
+# test_action_reward(brach=0.5, tri=2.0)

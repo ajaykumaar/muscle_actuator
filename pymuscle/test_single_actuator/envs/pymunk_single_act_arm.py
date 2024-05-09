@@ -233,28 +233,30 @@ class SingleActEnv(PymunkSingleActArmEnv):
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,))
         self.current_time = 0.0
+        self.actions = None
 
         self.target_angle = target_angle
+        self.prev_angle = None
 
-    def step(self, input_array, step_size=0.02, debug=False):
+    def step(self, actions, step_size=0.02, debug=False):
         # Check for user input
         self._handle_keys()
+        self.actions = actions
 
         if debug:
-            print(input_array)
-            print(input_array[0], input_array[1])
+            print(actions)
+            print(actions[0], actions[1])
 
         self.current_time += self.space.current_time_step
-        print("Time elapsed: ", self.current_time)
         #converting float32 action to float64 bcause pymuscle's muscle step only takes float64
-        input_array = input_array.astype(np.float64)
+        actions = actions.astype(np.float64)
 
         self.space.step(step_size)
         self.frames += 1
 
         # Advance muscle sim and sync with physics sim
-        brach_output = self.brach_muscle.step(input_array[0], step_size)
-        tricep_output = self.tricep_muscle.step(input_array[1], step_size)
+        brach_output = self.brach_muscle.step(actions[0], step_size)
+        tricep_output = self.tricep_muscle.step(actions[1], step_size)
 
         gain = 500
         self.brach.stiffness = brach_output * gain
@@ -302,8 +304,9 @@ class SingleActEnv(PymunkSingleActArmEnv):
         # if the lower arm angle goes beyond the range [157,260] the episode ends
         done = False
         arm_angle = np.rad2deg(self.copy_lower_arm.angle)
+        # print("Arm angle: ",arm_angle)
 
-        if arm_angle > 260 or arm_angle < 157:
+        if arm_angle > 260 or arm_angle < 120:
             done = True
         elif arm_angle == self.target_angle:
             done = True
@@ -311,15 +314,33 @@ class SingleActEnv(PymunkSingleActArmEnv):
         return done
     
     def _get_reward(self):
+        ### using reward function from pendulum-v1 env
+        current_angle = self._get_observation()[2] #current_angle
+        error = np.abs(current_angle - self.target_angle)
+
+        if self.prev_angle is None:
+            self.prev_angle = current_angle
+            theta_dt = 0
+
+        elif self.prev_angle is not None:
+            theta_dt = (current_angle - self.prev_angle)/self.space.current_time_step
+            self.prev_angle = current_angle
+
+        # print(error, theta_dt, current_angle - self.prev_angle)
+        reward = -((error**2) + (0.1*(theta_dt**2)) + 0.001* np.sum(self.actions))
+
+
+        ##### custom reward
         #reward = m*|current_angle - target_angle| + c*time   ; m= -1, c=100
         #max possible reward is c = 500, if target angle is reached
 
-        current_angle = self._get_observation()[2] #current_angle
+        # current_angle = self._get_observation()[2] #current_angle
+        # difference = np.abs(current_angle - self.target_angle)
 
-        if current_angle == self.target_angle:
-            reward = 500
-        else:
-            reward = -1.0*(np.abs(current_angle - self.target_angle)) + (10*self.current_time)
+        # if current_angle == self.target_angle:
+        #     reward = 500
+        # else:
+        #     reward = -self.current_time*(difference) + (10*self.current_time)
 
         return reward
 
