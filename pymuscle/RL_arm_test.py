@@ -25,7 +25,7 @@ print("observation space: ", env.observation_space)
 # print("observation space: ", env.observation_space)
 
 # Set up the simulation parameters
-sim_duration = 10  # seconds
+sim_duration = 20  # seconds
 frames_per_second = 50
 step_size = 1 / frames_per_second
 total_steps = int((sim_duration / step_size))
@@ -79,7 +79,7 @@ def test_action_reward(brach, tri):
     tricep_input = tri
 
     const_action = np.array([brachialis_input, tricep_input]).astype(np.float32)
-    rand_action = env.action_space.sample()
+    # rand_action = env.action_space.sample()
 
     # print(type(const_action), type(rand_action))
     # print(np.array(const_action).shape, rand_action.shape)
@@ -106,9 +106,11 @@ def test_action_reward(brach, tri):
     print(np.abs(lower_arm_angle[-1] - target_angle))
     time_steps = np.arange(0, sim_duration, step_size)#list(range(sim_duration, step_size))
     plt.figure(0)
+    plt.title("Lower Arm Angle")
     plt.plot(time_steps,lower_arm_angle)
     plt.figure(1)
+    plt.title("Reward")
     plt.plot(time_steps,reward_list)
     plt.show()
 
-test_action_reward(brach=0.5, tri=1.5)
+test_action_reward(brach=0.0, tri=2)
