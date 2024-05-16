@@ -113,4 +113,4 @@ def test_action_reward(brach, tri):
     plt.plot(time_steps,reward_list)
     plt.show()
 
-test_action_reward(brach=0.0, tri=2)
+test_action_reward(brach=1.0, tri=2)
