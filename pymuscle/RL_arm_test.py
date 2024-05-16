@@ -14,9 +14,14 @@ from stable_baselines3.common.monitor import Monitor
 
 from test_single_actuator.envs import SingleActEnv
 
+# Create log dir
+# log_dir = "/tmp/gym/"
+# os.makedirs(log_dir, exist_ok=True)
+
 # env = PymunkSingleActArmEnv(apply_fatigue=False)
 target_angle = 210
 env = SingleActEnv(target_angle=target_angle)
+# env = Monitor(env, log_dir)
 print("action space: ", env.action_space)
 print("observation space: ", env.observation_space)
 
@@ -42,6 +47,8 @@ def evaluate(model, num_steps=1000):
   :return: (float) Mean reward for the last 100 episodes
   """
   episode_rewards = [0.0]
+  lower_arm_angle = []
+  reward_list = []
   obs, info = env.reset()
 #   print(obs)
   for i in range(num_steps):
@@ -50,6 +57,8 @@ def evaluate(model, num_steps=1000):
       # here, action, rewards and dones are arrays
       # because we are using vectorized env
       obs, rewards, terminated, truncated, info = env.step(action)
+      lower_arm_angle.append(obs[2])
+      reward_list.append(rewards)
       print(action, rewards)
 
       # Stats
@@ -61,12 +70,20 @@ def evaluate(model, num_steps=1000):
   mean_100ep_reward = round(np.mean(episode_rewards[-100:]), 1)
   print("Mean reward:", mean_100ep_reward, "Num episodes:", len(episode_rewards))
 
+  time_steps = np.arange(0, num_steps*0.02, 0.02)#list(range(sim_duration, step_size))
+  print(len(time_steps), len(reward_list))
+  plt.figure(0)
+  plt.plot(time_steps,lower_arm_angle)
+  plt.figure(1)
+  plt.plot(time_steps,reward_list)
+  plt.show()
+
   return mean_100ep_reward
 
 
-# model.learn(total_timesteps=2_000)
+model.learn(total_timesteps=10_000)
 
-# evaluate(model)
+evaluate(model)
 
 def test_action_reward(brach, tri):
 
@@ -113,4 +130,7 @@ def test_action_reward(brach, tri):
     plt.plot(time_steps,reward_list)
     plt.show()
 
-test_action_reward(brach=1.0, tri=2)
+# test_action_reward(brach=1.0, tri=2)
+
+
+

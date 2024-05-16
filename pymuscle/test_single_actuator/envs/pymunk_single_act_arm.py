@@ -312,9 +312,9 @@ class SingleActEnv(PymunkSingleActArmEnv):
             done = True
 
         #if the lower arm angle hasn't reached the target in 10 seconds the episode ends
-        if self.current_time > 10:
-            if np.isclose(self.target_angle, arm_angle, atol= 5) == 0:
-                done = True
+        # if self.current_time > 10:
+        #     if np.isclose(self.target_angle, arm_angle, atol= 5) == 0:
+        #         done = True
 
         return done
     
@@ -333,7 +333,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         # print(error, theta_dt, current_angle - self.prev_angle)
         # reward = -((error**2) + (0.1*(theta_dt**2)) + 0.001* np.sum(self.actions))
-        reward = 360 - (0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
+        reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
 
 
         ##### custom reward
