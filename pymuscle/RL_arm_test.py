@@ -82,7 +82,7 @@ def evaluate(model, num_steps=1000):
   return mean_100ep_reward
 
 
-model.learn(total_timesteps=10_000)
+# model.learn(total_timesteps=10_000)
 
 evaluate(model)
 
