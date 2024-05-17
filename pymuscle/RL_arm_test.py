@@ -73,6 +73,7 @@ def evaluate(model, num_steps=1000):
   time_steps = np.arange(0, num_steps*0.02, 0.02)#list(range(sim_duration, step_size))
   print(len(time_steps), len(reward_list))
   plt.figure(0)
+  plt.title("Lower Arm Angle")
   plt.plot(time_steps,lower_arm_angle)
   plt.figure(1)
   plt.plot(time_steps,reward_list)
