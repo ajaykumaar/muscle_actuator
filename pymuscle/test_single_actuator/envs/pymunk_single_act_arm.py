@@ -331,7 +331,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
             theta_dt = 0
 
         elif self.prev_angle is not None:
-            theta_dt = (current_angle - self.prev_angle)/self.space.current_time_step
+            theta_dt = (np.abs(current_angle - self.prev_angle))/self.space.current_time_step
             self.prev_angle = current_angle
 
         if self.prev_actions is None:
@@ -345,7 +345,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         # print(br_exi_dt, tr_exi_dt)
         # reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
-        reward = -(0.2*(error**2) + 0.5*(br_exi_dt + tr_exi_dt)) 
+        reward = -(0.3*(error**2) +0.2*(theta_dt) + 0.1*(br_exi_dt + tr_exi_dt)) 
         # print("reward: ", reward)
 
 
