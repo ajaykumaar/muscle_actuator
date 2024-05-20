@@ -237,6 +237,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         self.target_angle = target_angle
         self.prev_angle = None
+        self.prev_actions = None
 
     def step(self, actions, step_size=0.02, debug=False):
         # Check for user input
@@ -244,19 +245,19 @@ class SingleActEnv(PymunkSingleActArmEnv):
         self.actions = actions
 
         if debug:
-            print(actions)
-            print(actions[0], actions[1])
+            print(self.actions)
+            print(self.actions[0], self.actions[1])
 
         self.current_time += self.space.current_time_step
         #converting float32 action to float64 bcause pymuscle's muscle step only takes float64
-        actions = actions.astype(np.float64)
+        self.actions = self.actions.astype(np.float64)
 
         self.space.step(step_size)
         self.frames += 1
 
         # Advance muscle sim and sync with physics sim
-        brach_output = self.brach_muscle.step(actions[0], step_size)
-        tricep_output = self.tricep_muscle.step(actions[1], step_size)
+        brach_output = self.brach_muscle.step(self.actions[0], step_size)
+        tricep_output = self.tricep_muscle.step(self.actions[1], step_size)
 
         gain = 500
         self.brach.stiffness = brach_output * gain
@@ -268,6 +269,8 @@ class SingleActEnv(PymunkSingleActArmEnv):
         truncated = False
         info = {}
         # print("obs from inside step :", obs)
+        #update previous action after reward calculation
+        self.prev_actions = actions
 
         return obs, reward, terminated, truncated, info  
     
@@ -331,9 +334,19 @@ class SingleActEnv(PymunkSingleActArmEnv):
             theta_dt = (current_angle - self.prev_angle)/self.space.current_time_step
             self.prev_angle = current_angle
 
-        # print(error, theta_dt, current_angle - self.prev_angle)
-        # reward = -((error**2) + (0.1*(theta_dt**2)) + 0.001* np.sum(self.actions))
-        reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
+        if self.prev_actions is None:
+            br_exi_dt = 0
+            tr_exi_dt = 0
+        
+        elif self.prev_actions is not None:
+            br_exi_dt = (np.abs(self.actions[0] - self.prev_actions[0]))/self.space.current_time_step
+            tr_exi_dt = (np.abs(self.actions[1] - self.prev_actions[1]))/self.space.current_time_step
+
+
+        # print(br_exi_dt, tr_exi_dt)
+        # reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
+        reward = -(0.2*(error**2) + 0.5*(br_exi_dt + tr_exi_dt)) 
+        print("reward: ", reward)
 
 
         ##### custom reward

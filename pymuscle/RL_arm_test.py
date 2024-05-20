@@ -84,7 +84,7 @@ def evaluate(model, num_steps=1000):
 
 # model.learn(total_timesteps=10_000)
 
-evaluate(model)
+# evaluate(model)
 
 def test_action_reward(brach, tri):
 
