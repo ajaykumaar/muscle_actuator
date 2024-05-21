@@ -357,9 +357,9 @@ class SingleActEnv(PymunkSingleActArmEnv):
             tr_exi_dt = (np.abs(self.actions[1] - self.prev_actions[1]))/self.step_size
 
 
-        # print(br_exi_dt, tr_exi_dt)
+        # print(error, theta_dt)
         # reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
-        reward = -(0.3*(error**2)) #+0.2*(theta_dt) + 0.1*(br_exi_dt + tr_exi_dt)) 
+        reward = -((error**2) + 0.1*(theta_dt**2)) #+ 0.1*(br_exi_dt + tr_exi_dt)) 
         # print("reward: ", reward)
 
 

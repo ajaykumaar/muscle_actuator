@@ -82,7 +82,7 @@ def evaluate(model, num_steps=1000):
   return mean_100ep_reward
 
 
-model.learn(total_timesteps=10_000)
+# model.learn(total_timesteps=10_000)
 
 # evaluate(model)
 
@@ -104,7 +104,7 @@ def test_action_reward(brach, tri):
 
     for i in range(total_steps):
         
-        obs, reward, termintated, truncated, info = env.step(const_action, step_size, debug=False)
+        obs, reward, termintated, truncated, info = env.step(const_action, debug=False)
         lower_arm_angle.append(obs[2])
         reward_list.append(reward)
         # print(reward)
@@ -131,7 +131,7 @@ def test_action_reward(brach, tri):
     plt.plot(time_steps,reward_list)
     plt.show()
 
-# test_action_reward(brach=1.0, tri=2)
+test_action_reward(brach=1.0, tri=2)
 
 
 
