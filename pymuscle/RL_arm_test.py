@@ -19,7 +19,7 @@ from test_single_actuator.envs import SingleActEnv
 # os.makedirs(log_dir, exist_ok=True)
 
 # env = PymunkSingleActArmEnv(apply_fatigue=False)
-target_angle = 210
+target_angle = np.deg2rad(210)
 env = SingleActEnv(target_angle=target_angle)
 # env = Monitor(env, log_dir)
 print("action space: ", env.action_space)
@@ -131,7 +131,7 @@ def test_action_reward(brach, tri):
     plt.plot(time_steps,reward_list)
     plt.show()
 
-# test_action_reward(brach=1.0, tri=2)
+test_action_reward(brach=1.0, tri=2)
 
 
 

@@ -36,3 +36,6 @@ Setup SSH key betwee google colab and github
 - added a variable to count time elapsed
 - reward right now, rewards for staying close to target over time.
 TODO: find a way to penalize for not staying close to target after certain time has elapsed
+
+
+Add angular velocity to observation

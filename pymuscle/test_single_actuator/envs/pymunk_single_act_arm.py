@@ -227,11 +227,11 @@ class PymunkSingleActArmEnv(gym.Env):
 
 class SingleActEnv(PymunkSingleActArmEnv):
 
-    def __init__(self, action_size=2, target_angle= 204):
+    def __init__(self, action_size=2, target_angle= np.deg2rad(210)):
         super().__init__()
 
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,))
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(4,))
         self.current_time = 0.0
         self.actions = None
 
@@ -295,21 +295,33 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
     def _get_observation(self):
 
-        hand_location = self.hand_shape.body.local_to_world((170, 0))
-        hand_x = hand_location[0]
-        hand_y = hand_location[1]
+        # hand_location = self.hand_shape.body.local_to_world((170, 0))
+        # hand_x = hand_location[0]
+        # hand_y = hand_location[1]
 
-        arm_angle = np.rad2deg(self.copy_lower_arm.angle)
+        arm_angle = self.copy_lower_arm.angle
 
-        return np.array([hand_x, hand_y, arm_angle]).astype(np.float32)
+        hand_x = np.cos(arm_angle)
+        hand_y = np.sin(arm_angle)
+
+        if self.prev_angle is None:
+            self.prev_angle = arm_angle
+            theta_dt = 0
+        elif self.prev_angle is not None:
+            theta_dt = (np.abs(arm_angle - self.prev_angle))/self.space.current_time_step
+            self.prev_angle = arm_angle
+
+        # print("Arm coordinate check: ", [hand_x, hand_y], [np.cos(arm_angle), np.sin(arm_angle)])
+
+        return np.array([hand_x, hand_y, arm_angle, theta_dt]).astype(np.float32)
     
     def _is_done(self):
         done = False
         
         # if the lower arm angle goes beyond the range [120,260] the episode ends
-        arm_angle = np.rad2deg(self.copy_lower_arm.angle)
+        arm_angle = self.copy_lower_arm.angle
 
-        if arm_angle > 260 or arm_angle < 120:
+        if arm_angle > np.deg2rad(260) or arm_angle < np.deg2rad(120):
             done = True
         elif arm_angle == self.target_angle:
             done = True
@@ -345,7 +357,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         # print(br_exi_dt, tr_exi_dt)
         # reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
-        reward = -(0.3*(error**2) +0.2*(theta_dt) + 0.1*(br_exi_dt + tr_exi_dt)) 
+        reward = -(0.3*(error**2)) #+0.2*(theta_dt) + 0.1*(br_exi_dt + tr_exi_dt)) 
         # print("reward: ", reward)
 
 
