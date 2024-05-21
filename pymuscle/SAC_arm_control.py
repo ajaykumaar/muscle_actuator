@@ -83,7 +83,7 @@ def evaluate(model, num_steps=500):
   :param num_steps: (int) number of timesteps to evaluate it
   :return: (float) Mean reward for the last 100 episodes
   """
-  target_angle = 210
+  target_angle = np.deg2rad(210)
   env = SingleActEnv(target_angle=target_angle)
 
   episode_rewards = [0.0]
@@ -94,7 +94,7 @@ def evaluate(model, num_steps=500):
   for i in range(num_steps):
       action, _states = model.predict(obs)
       obs, rewards, terminated, truncated, info = env.step(action)
-      lower_arm_angle.append(obs[2])
+      lower_arm_angle.append(np.rad2deg(obs[2]))
       reward_list.append(rewards)
       env.render()
 
@@ -134,10 +134,10 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 
 #### MAIN #######
 
-model = SAC("MlpPolicy", env, train_freq=1, learning_rate= linear_schedule(0.0003), gradient_steps=1, verbose=1)
+model = SAC("MlpPolicy", env, train_freq=1, learning_rate= linear_schedule(0.0004), gradient_steps=1, verbose=1)
 
 #load saved agent
-saved_model_path = "pymuscle/saved_models/best_model_1.zip"
+saved_model_path = "pymuscle/saved_models/best_model_2.zip"
 saved_model = model.load(path= saved_model_path)
 
 # Train the agent

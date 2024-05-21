@@ -359,6 +359,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         # print(error, theta_dt)
         # reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
+
         reward = -((error**2) + 0.1*(theta_dt**2)) #+ 0.1*(br_exi_dt + tr_exi_dt)) 
         # print("reward: ", reward)
 
