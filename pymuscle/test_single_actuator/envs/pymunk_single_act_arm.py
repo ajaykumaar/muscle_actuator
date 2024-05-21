@@ -227,19 +227,20 @@ class PymunkSingleActArmEnv(gym.Env):
 
 class SingleActEnv(PymunkSingleActArmEnv):
 
-    def __init__(self, action_size=2, target_angle= np.deg2rad(210)):
+    def __init__(self, action_size=2, step_size = 0.002, target_angle= np.deg2rad(210)):
         super().__init__()
 
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(4,))
         self.current_time = 0.0
         self.actions = None
+        self.step_size = step_size
 
         self.target_angle = target_angle
         self.prev_angle = None
         self.prev_actions = None
 
-    def step(self, actions, step_size=0.02, debug=False):
+    def step(self, actions, debug=False):
         # Check for user input
         self._handle_keys()
         self.actions = actions
@@ -248,16 +249,16 @@ class SingleActEnv(PymunkSingleActArmEnv):
             print(self.actions)
             print(self.actions[0], self.actions[1])
 
-        self.current_time += self.space.current_time_step
+        self.current_time += self.step_size
         #converting float32 action to float64 bcause pymuscle's muscle step only takes float64
         self.actions = self.actions.astype(np.float64)
 
-        self.space.step(step_size)
+        self.space.step(self.step_size)
         self.frames += 1
 
         # Advance muscle sim and sync with physics sim
-        brach_output = self.brach_muscle.step(self.actions[0], step_size)
-        tricep_output = self.tricep_muscle.step(self.actions[1], step_size)
+        brach_output = self.brach_muscle.step(self.actions[0], self.step_size)
+        tricep_output = self.tricep_muscle.step(self.actions[1], self.step_size)
 
         gain = 500
         self.brach.stiffness = brach_output * gain
@@ -303,12 +304,13 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         hand_x = np.cos(arm_angle)
         hand_y = np.sin(arm_angle)
+        # print(self.space.current_time_step)
 
         if self.prev_angle is None:
             self.prev_angle = arm_angle
             theta_dt = 0
         elif self.prev_angle is not None:
-            theta_dt = (np.abs(arm_angle - self.prev_angle))/self.space.current_time_step
+            theta_dt = (np.abs(arm_angle - self.prev_angle))/self.step_size
             self.prev_angle = arm_angle
 
         # print("Arm coordinate check: ", [hand_x, hand_y], [np.cos(arm_angle), np.sin(arm_angle)])
@@ -343,7 +345,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
             theta_dt = 0
 
         elif self.prev_angle is not None:
-            theta_dt = (np.abs(current_angle - self.prev_angle))/self.space.current_time_step
+            theta_dt = (np.abs(current_angle - self.prev_angle))/self.step_size
             self.prev_angle = current_angle
 
         if self.prev_actions is None:
@@ -351,8 +353,8 @@ class SingleActEnv(PymunkSingleActArmEnv):
             tr_exi_dt = 0
         
         elif self.prev_actions is not None:
-            br_exi_dt = (np.abs(self.actions[0] - self.prev_actions[0]))/self.space.current_time_step
-            tr_exi_dt = (np.abs(self.actions[1] - self.prev_actions[1]))/self.space.current_time_step
+            br_exi_dt = (np.abs(self.actions[0] - self.prev_actions[0]))/self.step_size
+            tr_exi_dt = (np.abs(self.actions[1] - self.prev_actions[1]))/self.step_size
 
 
         # print(br_exi_dt, tr_exi_dt)
