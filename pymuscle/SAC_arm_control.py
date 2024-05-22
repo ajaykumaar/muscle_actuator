@@ -76,7 +76,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
 
         return True
 
-def evaluate_model(model, num_steps = 500):
+def evaluate_model(model, num_steps = 1000):
   
   target_angle = 210
   env = SingleActEnv(target_angle= target_angle)
@@ -88,11 +88,24 @@ def evaluate_model(model, num_steps = 500):
   for i in range(num_steps):
       action, _states = model.predict(obs)
       obs, rewards, terminated, truncated, info = env.step(action)
-      print(obs)
+      reward_list.append(rewards)
+      lower_arm_angle.append(obs[2])
       env.render()
 
       if terminated:
           obs,info = env.reset()
+
+    
+  time_steps = np.arange(0, num_steps*0.02, 0.02)
+  plt.figure(0)
+  plt.title("Lower arm angle")
+  plt.plot(time_steps,lower_arm_angle)
+  plt.figure(1)
+  plt.title("Reward list")
+  plt.plot(time_steps,reward_list)
+  plt.show()
+
+  
 
 
 
@@ -155,10 +168,10 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 
 #### MAIN #######
 
-model = SAC("MlpPolicy", env, train_freq=1, learning_rate= linear_schedule(0.0004), gradient_steps=1, verbose=1)
+model = SAC("MlpPolicy", env, train_freq=1, gradient_steps=2, verbose=1)
 
 #load saved agent
-saved_model_path = "pymuscle/saved_models/best_model_1.zip"
+saved_model_path = "pymuscle/saved_models/best_model_og.zip"
 saved_model = model.load(path= saved_model_path)
 
 # Train the agent
@@ -176,4 +189,4 @@ saved_model = model.load(path= saved_model_path)
 #     obs, rewards, terminated, truncated, info = env.step(action)
 #     env.render()
 
-evaluate_model(saved_model)
+evaluate_model(saved_model, num_steps=1500)
