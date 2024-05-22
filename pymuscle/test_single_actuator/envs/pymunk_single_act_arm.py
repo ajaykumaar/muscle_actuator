@@ -227,11 +227,11 @@ class PymunkSingleActArmEnv(gym.Env):
 
 class SingleActEnv(PymunkSingleActArmEnv):
 
-    def __init__(self, action_size=2, step_size = 0.002, target_angle= np.deg2rad(210)):
+    def __init__(self, action_size=2, step_size = 0.002, target_angle= 210):
         super().__init__()
 
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(4,))
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,))
         self.current_time = 0.0
         self.actions = None
         self.step_size = step_size
@@ -300,10 +300,10 @@ class SingleActEnv(PymunkSingleActArmEnv):
         # hand_x = hand_location[0]
         # hand_y = hand_location[1]
 
-        arm_angle = self.copy_lower_arm.angle
+        arm_angle = np.rad2deg(self.copy_lower_arm.angle)
 
-        hand_x = np.cos(arm_angle)
-        hand_y = np.sin(arm_angle)
+        hand_x = np.cos(self.copy_lower_arm.angle)
+        hand_y = np.sin(self.copy_lower_arm.angle)
         # print(self.space.current_time_step)
 
         if self.prev_angle is None:
@@ -315,15 +315,15 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         # print("Arm coordinate check: ", [hand_x, hand_y], [np.cos(arm_angle), np.sin(arm_angle)])
 
-        return np.array([hand_x, hand_y, arm_angle, theta_dt]).astype(np.float32)
+        return np.array([hand_x, hand_y, arm_angle]).astype(np.float32)
     
     def _is_done(self):
         done = False
         
         # if the lower arm angle goes beyond the range [120,260] the episode ends
-        arm_angle = self.copy_lower_arm.angle
+        arm_angle = np.rad2deg(self.copy_lower_arm.angle)
 
-        if arm_angle > np.deg2rad(260) or arm_angle < np.deg2rad(120):
+        if arm_angle > 260 or arm_angle < 120:
             done = True
         elif arm_angle == self.target_angle:
             done = True
@@ -360,7 +360,7 @@ class SingleActEnv(PymunkSingleActArmEnv):
         # print(error, theta_dt)
         # reward = -(0.1*(error**2)) #+ 0.01*(theta_dt**2)) #* (-0.1*self.current_time)
 
-        reward = -((error**2) + 0.1*(theta_dt**2)) #+ 0.1*(br_exi_dt + tr_exi_dt)) 
+        reward = -(error**2) #+ 0.1*(theta_dt**2)) #+ 0.1*(br_exi_dt + tr_exi_dt)) 
         # print("reward: ", reward)
 
 

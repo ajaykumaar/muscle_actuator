@@ -19,7 +19,7 @@ from test_single_actuator.envs import SingleActEnv
 # os.makedirs(log_dir, exist_ok=True)
 
 # env = PymunkSingleActArmEnv(apply_fatigue=False)
-target_angle = np.deg2rad(210)
+target_angle = 210
 env = SingleActEnv(target_angle=target_angle)
 # env = Monitor(env, log_dir)
 print("action space: ", env.action_space)
@@ -84,7 +84,7 @@ def evaluate(model, num_steps=1000):
 
 # model.learn(total_timesteps=10_000)
 
-# evaluate(model)
+evaluate(model)
 
 def test_action_reward(brach, tri):
 
@@ -131,7 +131,26 @@ def test_action_reward(brach, tri):
     plt.plot(time_steps,reward_list)
     plt.show()
 
-test_action_reward(brach=1.0, tri=2)
+from typing import Callable
+def linear_schedule(initial_value: float) -> Callable[[float], float]:
+
+    def func(progress_remaining: float) -> float:
+        """
+        Progress will decrease from 1 (beginning) to 0.
+        :param progress_remaining:
+        :return: current learning rate
+        """
+        return progress_remaining * initial_value
+
+    return func
+
+model = SAC("MlpPolicy", env, train_freq=1, learning_rate= linear_schedule(0.0004), gradient_steps=1, verbose=1)
+
+#load saved agent
+saved_model_path = "pymuscle/saved_models/best_model_1.zip"
+saved_model = model.load(path= saved_model_path)
+   
+# test_action_reward(brach=1.0, tri=2)
 
 
 

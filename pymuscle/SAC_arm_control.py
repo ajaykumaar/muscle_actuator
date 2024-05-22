@@ -18,7 +18,7 @@ from test_single_actuator.envs import SingleActEnv
 log_dir = "pymuscle/saved_models/"
 target_angle = 210
 env = SingleActEnv(target_angle=target_angle)
-env = Monitor(env, log_dir)
+# env = Monitor(env, log_dir)
 print("action space: ", env.action_space)
 print("observation space: ", env.observation_space)
 
@@ -76,48 +76,69 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
 
         return True
 
-def evaluate(model, num_steps=500):
-  """
-  Evaluate a RL agent
-  :param model: (BaseRLModel object) the RL Agent
-  :param num_steps: (int) number of timesteps to evaluate it
-  :return: (float) Mean reward for the last 100 episodes
-  """
-  target_angle = np.deg2rad(210)
-  env = SingleActEnv(target_angle=target_angle)
-
+def evaluate_model(model, num_steps = 500):
+  
+  target_angle = 210
+  env = SingleActEnv(target_angle= target_angle)
   episode_rewards = [0.0]
   lower_arm_angle = []
   reward_list = []
   obs, info = env.reset()
-#   print(obs)
+
   for i in range(num_steps):
       action, _states = model.predict(obs)
       obs, rewards, terminated, truncated, info = env.step(action)
-      lower_arm_angle.append(np.rad2deg(obs[2]))
-      reward_list.append(rewards)
+      print(obs)
       env.render()
 
-      # Stats
-    #   episode_rewards[-1] += rewards
       if terminated:
-          obs, info = env.reset()
-        #   episode_rewards.append(0.0)
+          obs,info = env.reset()
 
-  # Compute mean reward for the last 100 episodes
-  mean_l100_reward = np.mean(reward_list[-100:])
-  print("Mean reward:", mean_l100_reward, "Num steps:", num_steps)
 
-  time_steps = np.arange(0, num_steps*0.02, 0.02)
-  plt.figure(0)
-  plt.title("Lower arm angle")
-  plt.plot(time_steps,lower_arm_angle)
-  plt.figure(1)
-  plt.title("Reward list")
-  plt.plot(time_steps,reward_list)
-  plt.show()
 
-  return mean_l100_reward
+# def evaluate(model, num_steps=500):
+#   """
+#   Evaluate a RL agent
+#   :param model: (BaseRLModel object) the RL Agent
+#   :param num_steps: (int) number of timesteps to evaluate it
+#   :return: (float) Mean reward for the last 100 episodes
+#   """
+# #   target_angle = 210
+# #   env = SingleActEnv(target_angle=target_angle)
+
+#   episode_rewards = [0.0]
+#   lower_arm_angle = []
+#   reward_list = []
+#   obs, info = env.reset()
+# #   print(obs)
+#   for i in range(num_steps):
+#       action, _states = model.predict(obs)
+#       action = np.array([0.5, 2.0]).astype(np.float32)
+#       obs, rewards, terminated, truncated, info = env.step(action)
+#       lower_arm_angle.append(obs[2])
+#       reward_list.append(rewards)
+#       env.render()
+
+#       # Stats
+#     #   episode_rewards[-1] += rewards
+#       if terminated:
+#           obs, info = env.reset()
+#         #   episode_rewards.append(0.0)
+
+#   # Compute mean reward for the last 100 episodes
+#   mean_l100_reward = np.mean(reward_list[-100:])
+#   print("Mean reward:", mean_l100_reward, "Num steps:", num_steps)
+
+#   time_steps = np.arange(0, num_steps*0.02, 0.02)
+#   plt.figure(0)
+#   plt.title("Lower arm angle")
+#   plt.plot(time_steps,lower_arm_angle)
+#   plt.figure(1)
+#   plt.title("Reward list")
+#   plt.plot(time_steps,reward_list)
+#   plt.show()
+
+#   return mean_l100_reward
 
 def linear_schedule(initial_value: float) -> Callable[[float], float]:
 
@@ -137,7 +158,7 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 model = SAC("MlpPolicy", env, train_freq=1, learning_rate= linear_schedule(0.0004), gradient_steps=1, verbose=1)
 
 #load saved agent
-saved_model_path = "pymuscle/saved_models/best_model_2.zip"
+saved_model_path = "pymuscle/saved_models/best_model_1.zip"
 saved_model = model.load(path= saved_model_path)
 
 # Train the agent
@@ -146,4 +167,13 @@ saved_model = model.load(path= saved_model_path)
 # model.learn(total_timesteps=30_000, callback = callback)
 
 #Evaluate model
-mean_rew = evaluate(saved_model)
+# mean_rew = evaluate(saved_model)
+
+# obs, info = env.reset()
+# for i in range(500):
+#     print(obs)
+#     action, _states = saved_model.predict(obs)
+#     obs, rewards, terminated, truncated, info = env.step(action)
+#     env.render()
+
+evaluate_model(saved_model)
