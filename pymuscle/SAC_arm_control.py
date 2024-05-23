@@ -136,5 +136,6 @@ saved_model = model.load(path= saved_model_path)
 
 # model.learn(total_timesteps=30_000, callback = callback)
 target_angle = 210
-env = SingleActEnv(target_angle= target_angle)
+env = SingleActEnv(target_angle= target_angle, potvin_chart= True)
 evaluate_model(saved_model, env,num_steps=1500)
+env.create_potvin_chart()

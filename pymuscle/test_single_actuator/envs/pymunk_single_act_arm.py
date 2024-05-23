@@ -8,9 +8,7 @@ import numpy as np
 from pygame.locals import (QUIT, KEYDOWN, K_ESCAPE)
 # from pymuscle import StandardMuscle as Muscle
 from pymuscle import PotvinFuglevandMuscle as Muscle
-#Uncomment the below line to run on google colab
-# from pymuscle.pymuscle import PotvinFuglevandMuscle as Muscle 
-
+from pymuscle.vis import PotvinChart
 
 # from pymunk.constraints import *
 
@@ -227,7 +225,7 @@ class PymunkSingleActArmEnv(gym.Env):
 
 class SingleActEnv(PymunkSingleActArmEnv):
 
-    def __init__(self, action_size=2, step_size = 0.002, target_angle= 210):
+    def __init__(self, action_size=2, step_size = 0.002, target_angle= 210, potvin_chart =False):
         super().__init__()
 
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
@@ -235,6 +233,9 @@ class SingleActEnv(PymunkSingleActArmEnv):
         self.current_time = 0.0
         self.actions = None
         self.step_size = step_size
+        self.potvin_chart = potvin_chart
+        self.outputs_by_unit = {"biceps_muscle": [],
+                                "triceps_muscle": []}
 
         self.target_angle = target_angle
         self.prev_angle = None
@@ -259,6 +260,11 @@ class SingleActEnv(PymunkSingleActArmEnv):
         # Advance muscle sim and sync with physics sim
         brach_output = self.brach_muscle.step(self.actions[0], self.step_size)
         tricep_output = self.tricep_muscle.step(self.actions[1], self.step_size)
+
+        if self.potvin_chart == True:
+            self.outputs_by_unit["biceps_muscle"].append(self.brach_muscle.current_forces)
+            self.outputs_by_unit["triceps_muscle"].append(self.brach_muscle.current_forces)
+            
 
         gain = 500
         self.brach.stiffness = brach_output * gain
@@ -293,6 +299,24 @@ class SingleActEnv(PymunkSingleActArmEnv):
         info = {}
 
         return obs, info
+    
+    def create_potvin_chart(self):
+        
+        # Visualize the behavior of the motor units over time
+        print("Creating chart ...")
+        biceps_chart = PotvinChart(
+            self.outputs_by_unit["biceps_muscle"],
+            self.step_size
+        )
+
+        triceps_chart = PotvinChart(
+            self.outputs_by_unit["triceps_muscle"],
+            self.step_size
+        )
+
+        biceps_chart.display()
+        triceps_chart.display()
+
 
     def _get_observation(self):
 
