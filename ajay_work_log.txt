@@ -1,3 +1,5 @@
+Colab notebook - https://colab.research.google.com/drive/1Kdr5hqQTN4ADwSi0r8ODJtQFOMA6JHdR#scrollTo=JAZlxAEP8ddw
+
 4/26/24 Friday
 
 Rundown on existing codes

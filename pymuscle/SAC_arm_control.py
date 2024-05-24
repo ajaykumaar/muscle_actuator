@@ -103,7 +103,7 @@ def evaluate_model(model, env, num_steps = 1000, save_results = True):
         if len(frames_list) > 0:
             # choose codec according to format needed
             fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
-            video = cv2.VideoWriter(save_path + "simulation.avi", fourcc, 100, (600, 600))
+            video = cv2.VideoWriter(save_path + "simulation.avi", fourcc, 200, (600, 600))
 
             for frame in frames_list:
                 video.write(frame)
@@ -158,6 +158,6 @@ saved_model = model.load(path= saved_model_path)
 # model.learn(total_timesteps=30_000, callback = callback)
 target_angle = 210
 env = SingleActEnv(target_angle= target_angle, potvin_chart= False)
-evaluate_model(saved_model, env,num_steps=1500, save_results = False)
+evaluate_model(saved_model, env,num_steps=1500, save_results = True)
 # env.create_potvin_chart()
 
