@@ -1,12 +1,6 @@
 # muscle_actuator
 
-4/26/24 Friday
-
-Rundown on existing codes
-
-4/29/24 Monday
-
-Setup github and google colab to run the muscle actuator on colab
-
-4/30/24 Tuesday
-
+Environment - pymuscle/test_single_actuator/envs/pymunk_single_act_arm.py
+PID control - pymuscle/PID_arm_angle_ctrl.py
+SAC control - pymuscle/SAC_arm_control.py
+Simulation results - pymuscle/simulation_results

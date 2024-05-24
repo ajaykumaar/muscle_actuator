@@ -1,5 +1,5 @@
 import sys
-# import gym
+import cv2
 import gymnasium as gym
 import pygame
 import pymunk
@@ -9,6 +9,8 @@ from pygame.locals import (QUIT, KEYDOWN, K_ESCAPE)
 # from pymuscle import StandardMuscle as Muscle
 from pymuscle import PotvinFuglevandMuscle as Muscle
 from pymuscle.vis import PotvinChart
+
+# from pygame_recorder import ScreenRecorder
 
 # from pymunk.constraints import *
 
@@ -225,17 +227,19 @@ class PymunkSingleActArmEnv(gym.Env):
 
 class SingleActEnv(PymunkSingleActArmEnv):
 
-    def __init__(self, action_size=2, step_size = 0.002, target_angle= 210, potvin_chart =False):
+    def __init__(self, action_size=2, step_size = 0.002, fps = 50, target_angle= 210, potvin_chart =False):
         super().__init__()
 
         self.action_space = gym.spaces.Box(low=0.0, high=2.0, shape=(action_size,))
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,))
         self.current_time = 0.0
         self.actions = None
-        self.step_size = step_size
+        self.frames_per_second = fps
+        self.step_size = step_size #step_size = 1/fps
         self.potvin_chart = potvin_chart
         self.outputs_by_unit = {"biceps_muscle": [],
                                 "triceps_muscle": []}
+        # self.recorder = ScreenRecorder(self.screen.get_width(), self.screen.get_height(), self.frames_per_second)
 
         self.target_angle = target_angle
         self.prev_angle = None
@@ -316,6 +320,21 @@ class SingleActEnv(PymunkSingleActArmEnv):
 
         biceps_chart.display()
         triceps_chart.display()
+
+    def render(self, save_result= False, debug=True):
+        if debug and (self.draw_options.flags != 3):
+            self.draw_options.flags = 3  # Enable constraint drawing
+
+        self.screen.fill((255, 255, 255))
+        self.space.debug_draw(self.draw_options)
+        pygame.display.flip()
+
+        # get frame
+        pixels = cv2.rotate(pygame.surfarray.pixels3d(self.screen), cv2.ROTATE_90_CLOCKWISE)
+        pixels = cv2.flip(pixels, 1)
+        pixels = cv2.cvtColor(pixels, cv2.COLOR_RGB2BGR)
+
+        return pixels
 
 
     def _get_observation(self):

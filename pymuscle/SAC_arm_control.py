@@ -1,4 +1,5 @@
 import sys
+import cv2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ from test_single_actuator.envs import SingleActEnv
 log_dir = "pymuscle/saved_models/"
 target_angle = 210
 env = SingleActEnv(target_angle=target_angle)
-# env = Monitor(env, log_dir)
+# env = Monitor(env, log_dir) #comment out this line before evaluation
 print("action space: ", env.action_space)
 print("observation space: ", env.observation_space)
 
@@ -76,8 +77,9 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
 
         return True
 
-def evaluate_model(model, env, num_steps = 1000):
+def evaluate_model(model, env, num_steps = 1000, save_results = True):
     
+    frames_list = []
     actions_list = []
     lower_arm_angle = []
     reward_list = []
@@ -89,24 +91,43 @@ def evaluate_model(model, env, num_steps = 1000):
         reward_list.append(rewards)
         lower_arm_angle.append(obs[2])
         actions_list.append(action)
-        env.render()
+        frame = env.render()
+        frames_list.append(frame)
 
         if terminated:
             obs,info = env.reset()
 
+    if save_results == True:
+        save_path = "pymuscle/simulation_results/"
+        #save video
+        if len(frames_list) > 0:
+            # choose codec according to format needed
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+            video = cv2.VideoWriter(save_path + "simulation.avi", fourcc, 100, (600, 600))
+
+            for frame in frames_list:
+                video.write(frame)
+            cv2.destroyAllWindows()
+            video.release()
+
+        else:
+            print("frames list is empty")
     actions_list = np.array(actions_list)
     time_steps = np.arange(0, num_steps*0.02, 0.02)
     plt.figure(0)
     plt.title("Lower arm angle")
     plt.plot(time_steps, lower_arm_angle)
+    if save_results == True: plt.savefig(save_path + "lower_arm_angle.png")
     plt.figure(1)
-    plt.title("Reward list")
+    plt.title("Rewards")
     plt.plot(time_steps, reward_list)
+    if save_results == True: plt.savefig(save_path + "rewards.png")
     plt.figure(2)
     plt.title("Muscle excitation")
     plt.plot(time_steps, actions_list[:,0], label = "biceps")
     plt.plot(time_steps, actions_list[:,1], label = "tricepts")
     plt.legend()
+    if save_results == True: plt.savefig(save_path + "muscle_excitation.png")
     plt.show()
 
 
@@ -125,7 +146,7 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 
 #### MAIN #######
 
-model = SAC("MlpPolicy", env, train_freq=1, gradient_steps=2, verbose=1)
+model = SAC("MlpPolicy", env, train_freq=1, learning_rate= linear_schedule(0.004), gradient_steps=2, verbose=1)
 
 #load saved agent
 saved_model_path = "pymuscle/saved_models/best_model_og.zip"
@@ -136,6 +157,7 @@ saved_model = model.load(path= saved_model_path)
 
 # model.learn(total_timesteps=30_000, callback = callback)
 target_angle = 210
-env = SingleActEnv(target_angle= target_angle, potvin_chart= True)
-evaluate_model(saved_model, env,num_steps=1500)
-env.create_potvin_chart()
+env = SingleActEnv(target_angle= target_angle, potvin_chart= False)
+evaluate_model(saved_model, env,num_steps=1500, save_results = False)
+# env.create_potvin_chart()
+
